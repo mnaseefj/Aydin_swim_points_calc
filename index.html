@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maldives Swim Points Calculator</title>
+    <style>
+        /* Body styling */
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f7f7f7;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        /* Main container styling */
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        /* Title styling */
+        h1 {
+            text-align: center;
+            color: #0a3b8a;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        /* Form elements styling */
+        select, input, button {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 2px solid #ccc;
+            border-radius: 8px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+
+        /* Focus effect for form elements */
+        select:focus, input:focus, button:focus {
+            border-color: #0a3b8a;
+            outline: none;
+        }
+
+        /* Button styling */
+        button {
+            background-color: #0a3b8a;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+            border-radius: 8px;
+            padding: 14px;
+        }
+
+        button:hover {
+            background-color: #084f73;
+        }
+
+        /* Points result styling */
+        #pointsResult {
+            text-align: center;
+            font-size: 28px;
+            color: #0a3b8a;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+
+        /* Responsive design for small screens */
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px;
+                width: 90%;
+            }
+            h1 {
+                font-size: 20px;
+            }
+        }
+
+        /* Footer styling */
+        footer {
+            font-size: 14px;
+            color: #888;
+            text-align: center;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Swimming Points Calculator</h1>
+        
+        <select id="course">
+            <option value="Short Course">Short Course</option>
+            <option value="Long Course">Long Course</option>
+        </select>
+
+        <select id="gender">
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+        </select>
+
+        <select id="event">
+            <option value="Freestyle">Freestyle</option>
+            <option value="Backstroke">Backstroke</option>
+            <option value="Breaststroke">Breaststroke</option>
+            <option value="Butterfly">Butterfly</option>
+            <option value="IM">IM</option>
+        </select>
+
+        <select id="distance">
+            <!-- Dynamic options will be populated based on event -->
+        </select>
+
+        <input type="number" id="minutes" placeholder="Minutes" />
+        <input type="number" id="seconds" placeholder="Seconds" />
+        <input type="number" id="milliseconds" placeholder="Milliseconds" />
+        
+        <button id="calculate">Calculate Points</button>
+
+        <div id="pointsResult"></div>
+        
+        <footer>
+            Developed by Aydin - [Updated on 30th March 2025]
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const courseSelect = document.getElementById('course');
+            const genderSelect = document.getElementById('gender');
+            const eventSelect = document.getElementById('event');
+            const distanceSelect = document.getElementById('distance');
+            const calculateButton = document.getElementById('calculate');
+            const pointsResult = document.getElementById('pointsResult');
+            const minutesInput = document.getElementById('minutes');
+            const secondsInput = document.getElementById('seconds');
+            const millisecondsInput = document.getElementById('milliseconds');
+
+            const events = ["Freestyle", "Backstroke", "Breaststroke", "Butterfly", "IM"];
+            const distancesByEvent = {
+                Freestyle: ["50m", "100m", "200m", "400m", "800m", "1500m"],
+                Backstroke: ["50m", "100m", "200m"],
+                Breaststroke: ["50m", "100m", "200m"],
+                Butterfly: ["50m", "100m", "200m"],
+                IM: ["100m", "200m", "400m"]
+            };
+
+            const baseTimes = {
+                "Long Course": {
+                    Male: {
+                        Butterfly: { "50m": 26.98, "100m": 60.14, "200m": 148.17 },
+                        Backstroke: { "50m": 29.51, "100m": 64.51, "200m": 142.88 },
+                        Breaststroke: { "50m": 33.24, "100m": 74.58, "200m": 165.81 },
+                        Freestyle: { "50m": 24.22, "100m": 54.46, "200m": 124.75, "400m": 268.34, "800m": 566.67, "1500m": 1083.57 },
+                        IM: { "200m": 142.07, "400m": 314.03 }
+                    },
+                    Female: {
+                        Butterfly: { "50m": 31.68, "100m": 73.96, "200m": 184.45 },
+                        Backstroke: { "50m": 34.18, "100m": 77.69, "200m": 171.26 },
+                        Breaststroke: { "50m": 37.17, "100m": 84.65, "200m": 184.53 },
+                        Freestyle: { "50m": 28.64, "100m": 64.32, "200m": 145.32, "400m": 310.57, "800m": 641.41, "1500m": 1352.83 },
+                        IM: { "200m": 165.93, "400m": 369.10 }
+                    }
+                },
+                "Short Course": {
+                    Male: {
+                        Butterfly: { "50m": 26.67, "100m": 59.69, "200m": 141.75 },
+                        Backstroke: { "50m": 28.22, "100m": 62.81, "200m": 144.26 },
+                        Breaststroke: { "50m": 32.95, "100m": 72.85, "200m": 157.35 },
+                        Freestyle: { "50m": 23.76, "100m": 53.45, "200m": 121.08, "400m": 264.45, "800m": 612.07, "1500m": 1166.54 },
+                        IM: { "100m": 64.19, "200m": 139.77, "400m": 300.64 }
+                    },
+                    Female: {
+                        Butterfly: { "50m": 31.41, "100m": 71.52, "200m": 174.06 },
+                        Backstroke: { "50m": 32.78, "100m": 74.03, "200m": 163.61 },
+                        Breaststroke: { "50m": 37.13, "100m": 82.65, "200m": 180.53 },
+                        Freestyle: { "50m": 28.55, "100m": 63.68, "200m": 140.65, "400m": 329.88, "800m": 677.32, "1500m": 1352.83 },
+                        IM: { "100m": 74.07, "200m": 162.67, "400m": 386.56 }
+                    }
+                }
+            };
+
+            function updateDistanceOptions() {
+                const selectedEvent = eventSelect.value;
+                const distances = distancesByEvent[selectedEvent];
+                distanceSelect.innerHTML = ''; // Clear the distance options
+                distances.forEach(distance => {
+                    const option = document.createElement('option');
+                    option.value = distance;
+                    option.textContent = distance;
+                    distanceSelect.appendChild(option);
+                });
+            }
+
+            function calculatePoints() {
+                const course = courseSelect.value;
+                const gender = genderSelect.value;
+                const event = eventSelect.value;
+                const distance = distanceSelect.value;
+                const minutes = parseInt(minutesInput.value) || 0;
+                const seconds = parseInt(secondsInput.value) || 0;
+                const milliseconds = parseInt(millisecondsInput.value) || 0;
+
+                const timeInSeconds = minutes * 60 + seconds + milliseconds / 100;
+                const baseTime = baseTimes[course][gender][event][distance];
+                
+                if (baseTime) {
+                    // Calculate the points based on the formula
+                    const points = Math.floor(1000 * (baseTime / timeInSeconds) ** 3);  // Rounding down to the nearest whole number
+                    pointsResult.textContent = `Points: ${points}`;
+                } else {
+                    pointsResult.textContent = "Invalid event or distance";
+                }
+            }
+
+            courseSelect.addEventListener('change', updateDistanceOptions);
+            eventSelect.addEventListener('change', updateDistanceOptions);
+            calculateButton.addEventListener('click', calculatePoints);
+
+            // Initial population of distance options
+            updateDistanceOptions();
+        });
+    </script>
+</body>
+</html>
